@@ -1,1 +1,66 @@
-﻿
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <style>
+        div.padded {
+            padding-top: 0px;
+            padding-right: 100px;
+            padding-bottom: 0.25in;
+            padding-left: 100px;
+        }
+    </style>
+    <title>Project Proposal  |  CS 184</title>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <link rel="stylesheet" type="text/css" href="style.css" media="screen" />
+</head>
+<body style="font-family: Trebuchet MS">
+    <br />
+    <h1 align="middle">
+        Improving Fluid Dynamics Simulation
+    </h1>
+    <h2 align="middle">Chuck Tang | Josephine Wen| Eric Wimsatt| Fatema Yasini</h2>
+    <div class="padded">
+        <p>
+            We will implement a 4th order differential equation solver for Fluid Dynamics Simulation.
+            We hope to provide interactive demos of our fluid dynamics simulator that users can play with in three.js
+            Our stretch goal is to learn a PDE solver using sinusoidal activation functions.
+        </p>
+
+
+        <h2 align="middle">Problem Description</h2>
+        <p align="justify">
+            The Navier-Stokes equation for fluid dynamics is one of the millennium math prize puzzles that governs many natural phenomena like water and smoke.
+            We aim to write a numerical solver for this differential equation and build a web tool to visualize dynamics.
+            We hope to build on top of existing solvers and codebases presented by the NVIDIA GPU Gems so that we don’t reinvent the wheel.
+            The challenge lies in faithfully implementing a 4th order differential equation solver and improving the fidelity of such simulation.
+        </p>
+        <h2 align="middle">Goals and Deliverables</h2>
+        <p align="justify">
+            We will create a visual demo that will allow a user to switch between different hyperparameters to solve the Navier-Stokes Differential Equation. The hope is that higher order methods will produce cleaner visual effects that model the dynamics of our chosen natural phenomena with higher fidelity.
+            We will provide comparisons showing the difference in converge thresholds for different differential equation solvers. We will also compare visual improvements as of a result of the optimization.
+        </p>
+
+
+
+        <h2 align="middle">Schedule</h2>
+        <p align="justify">
+            4/16 Implement baseline code of Navier-Stokes equation for fluid dynamics on three.js running</br>
+            4/23 Interactive simulation</br>
+            4/28 Improve baseline performance with Runge Kutta Schemes, Ghost Boundary Conditions, and CFL constraints. (1 week) </br>
+            5/3 Stretch: Try learning the differential equation with sinusoidal activation functions (1 week)</br>
+        </p>
+
+
+
+        <h2 align="middle">Resources</h2>
+        <p align="justify">
+            http://developer.download.nvidia.com/books/HTML/gpugems/gpugems_ch38.html </br>
+            https://www.wikiwand.com/en/Computational_fluid_dynamics </br>
+            https://github.com/xingxiaoxiong/fluid-2d </br>
+            https://github.com/arsh-khokhar/GPU-Fluid-Simulator/blob/master/main.js </br>
+            https://github.com/WoodNeck/Fast-Fluid-Dynamics-Simulation-on-the-GPU</br>
+            https://vsitzmann.github.io/siren/ </br>
+        </p>
+    </div>
+</body>
+</html>
