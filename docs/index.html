@@ -2,65 +2,110 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
     <style>
-        div.padded {
-            padding-top: 0px;
-            padding-right: 100px;
-            padding-bottom: 0.25in;
-            padding-left: 100px;
+        body {
+            padding: 100px;
+            width: 1000px;
+            margin: auto;
+            text-align: left;
+            font-weight: 300;
+            font-family: 'Open Sans', sans-serif;
+            color: #121212;
+        }
+
+        h1, h2, h3, h4 {
+            font-family: 'Source Sans Pro', sans-serif;
         }
     </style>
-    <title>Project Proposal  |  CS 184</title>
+    <title>CS 184 Final Project</title>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-    <link rel="stylesheet" type="text/css" href="style.css" media="screen" />
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans|Source+Sans+Pro" rel="stylesheet" />
 </head>
-<body style="font-family: Trebuchet MS">
+
+<body>
+
+    <h1 align="middle">CS 184 Final Project: Improving Fluid Dynamics Simulation</h1>
     <br />
-    <h1 align="middle">
-        Improving Fluid Dynamics Simulation
+    <h1>Members</h1>
+    <p>
+        Chuck Tang | Josephine Wen | Eric Wimsatt| Fatema Yasini
+    </p>
+    <h1>Summary</h1>
+
+    <p>
+        We will implement a 4th order differential equation solver for Fluid Dynamics Simulation.
+        We hope to provide interactive demos of our fluid dynamics simulator that users can play with in three.js
+        Our stretch goal is to learn a PDE solver using sinusoidal activation functions.
+    </p>
+
+    <h1>
+        Problem Description
     </h1>
-    <h2 align="middle">Chuck Tang | Josephine Wen| Eric Wimsatt| Fatema Yasini</h2>
-    <div class="padded">
-        <p>
-            We will implement a 4th order differential equation solver for Fluid Dynamics Simulation.
-            We hope to provide interactive demos of our fluid dynamics simulator that users can play with in three.js
-            Our stretch goal is to learn a PDE solver using sinusoidal activation functions.
-        </p>
+    <p>
+        The Navier-Stokes equation for fluid dynamics is one of the millennium math prize puzzles that governs many natural phenomena like water and smoke.
+        We aim to write a numerical solver for this differential equation and build a web tool to visualize dynamics.
+        We hope to build on top of existing solvers and codebases presented by the NVIDIA GPU Gems so that we don’t reinvent the wheel.
+        The challenge lies in faithfully implementing a 4th order differential equation solver and improving the accuracy of such simulation.
+    </p>
+
+    <h2 align="middle">Goals and Deliverables</h2>
+    <h3>Part 1: Baseline Plan</h3>
+    <p>
+        We will implement the Navier-Stokes equation for fluid dynamics to simulate incomprehensible flow. The hope is that higher order methods will produce cleaner visual effects that model the dynamics of our chosen natural phenomena with higher fidelity. We will compare the differences between less accurate models to show that this method produces a more accurate and quicker simulation of incomprehensible flow.
+    </p>
+    <p>
+        We will provide comparisons showing the difference in converge thresholds for different differential equation solvers. We will also compare visual improvements as of a result of the optimization.
+        We also hope to simulate the results of this project interactively, such that the user can play around with different parameters and visual effects.
+    </p>
 
 
-        <h2 align="middle">Problem Description</h2>
-        <p align="justify">
-            The Navier-Stokes equation for fluid dynamics is one of the millennium math prize puzzles that governs many natural phenomena like water and smoke.
-            We aim to write a numerical solver for this differential equation and build a web tool to visualize dynamics.
-            We hope to build on top of existing solvers and codebases presented by the NVIDIA GPU Gems so that we don’t reinvent the wheel.
-            The challenge lies in faithfully implementing a 4th order differential equation solver and improving the fidelity of such simulation.
-        </p>
-        <h2 align="middle">Goals and Deliverables</h2>
-        <p align="justify">
-            We will create a visual demo that will allow a user to switch between different hyperparameters to solve the Navier-Stokes Differential Equation. The hope is that higher order methods will produce cleaner visual effects that model the dynamics of our chosen natural phenomena with higher fidelity.
-            We will provide comparisons showing the difference in converge thresholds for different differential equation solvers. We will also compare visual improvements as of a result of the optimization.
-        </p>
+    <h3>Part 2: Inspirational Plan</h3>
+    <p>
+        The main goal of our project is to utilize the Navier-Stokes equation for fluid dynamics to create a simulation for fluids. Our stretch goal, however, is to use sinusoidal activation functions and neural networks to achieve an even more accurate representation of incomprehensible flow. Although this stretch goal would require us to delve deeper into neural networks and potentially utilizing a partial differential equation solver, this would result in a more accurate representation of the fluid dynamics and minimize errors.
+
+    </p>
+
+    <h3>Schedule</h3>
+
+    <ul>
+        <li> Week 1: 4/5 - 4/10</li>
+        <ul>
+            <li>Proposal due 4/9</li>
+
+            <li>Gather sources, develop project idea, formulate goal/plan</li>
+        </ul>
+        <li>Week 2: 4/11 - 4/17</li>
+        <ul>
+            <li>Proposal revisions + outline code</li>
+            <li>Implement baseline code of Navier-Stokes equation for fluid dynamics on three.js running</li>
+        </ul>
+        <li>Week 3: 4/18 - 4/24</li>
+        <ul><li>Continue working on code + milestone</li></ul>
+        <li>Week 4: 4/25 - 5/1</li>
+        <ul>
+            <li>Milestone due 4/27 + continue working on code</li>
+            <li>Work on Interactive simulation</li>
+            <li>Improve baseline performance with Runge Kutta Schemes, Ghost Boundary Conditions, and CFL constraints.</li>
+            <li>Testing, benchmarks, comparisons in performance</li>
+        </ul>
+        <li>Week 5: 5/2 - 5/8</li>
+        <ul>
+            <li>Finalize code + final presentations 5/6</li>
+            <li>Stretch Goal: Try learning differential equations with sinusoidal activation functions in order to utilize neural networks</li>
+        </ul>
+        <li>Week 6: 5/9 - 5/11</li>
+        <ul><li>Final deliverables due 5/11</li></ul>
+    </ul>
+
+
+    <h2 align="middle">Resources</h2>
+    <p>
+        We will be referencing <a href="http://developer.download.nvidia.com/books/HTML/gpugems/gpugems_ch38.html">GPU gems guide</a> on simulating fluid dynamics including Navier-Stokes for incomprehensible flow.
+
+        This website about<a href="https://www.wikiwand.com/en/Computational_fluid_dynamics ">computational fluid dynamics</a> provides more insight on using Navier-Stokes and other methodologies.
 
 
 
-        <h2 align="middle">Schedule</h2>
-        <p align="justify">
-            4/16 Implement baseline code of Navier-Stokes equation for fluid dynamics on three.js running</br>
-            4/23 Interactive simulation</br>
-            4/28 Improve baseline performance with Runge Kutta Schemes, Ghost Boundary Conditions, and CFL constraints. (1 week) </br>
-            5/3 Stretch: Try learning the differential equation with sinusoidal activation functions (1 week)</br>
-        </p>
-
-
-
-        <h2 align="middle">Resources</h2>
-        <p align="justify">
-            http://developer.download.nvidia.com/books/HTML/gpugems/gpugems_ch38.html </br>
-            https://www.wikiwand.com/en/Computational_fluid_dynamics </br>
-            https://github.com/xingxiaoxiong/fluid-2d </br>
-            https://github.com/arsh-khokhar/GPU-Fluid-Simulator/blob/master/main.js </br>
-            https://github.com/WoodNeck/Fast-Fluid-Dynamics-Simulation-on-the-GPU</br>
-            https://vsitzmann.github.io/siren/ </br>
-        </p>
-    </div>
+        We will also reference <a href="https://vsitzmann.github.io/siren/">siren</a> for more insight about utilizing neural networks to achieve a more accurate simulation.
+    </p>
 </body>
 </html>
