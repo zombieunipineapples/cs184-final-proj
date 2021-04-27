@@ -83,48 +83,6 @@ function clickEnd(event){
       clickNow = false;
  }
 
-
-function UpdateMousePosition (X, Y) {
-  var mouseX = X / window.innerWidth;
-  var mouseY = (window.innerHeight - Y) / window.innerHeight;
-
-  if (mouseDown && X < window.innerWidth && Y < window.innerHeight && X > 0 && Y > 0) {
-  console.log("mouse", mouseX, mouseY);
-   // addFluid (mouseX, mouseY);
-    prevMouseX = mouseX;
-    prevMouseY = mouseY;
-  }
-}
-document.onmousemove = function (event) {
-  UpdateMousePosition (
-    event.clientX,
-    event.clientY 
-  );
-};
-
-document.onmousedown = function (event) {
-  mouseDown = true;
-};
-document.onmouseup = function (event) {
-  mouseDown = false;
-};
-
-document.ontouchmove = function (event) {
-  UpdateMousePosition (
-    event.clientX ,
-    event.clientY 
-  );
-};
-
-document.ontouchstart = function (event) {
-  addfluid (0, 0);
-  mouseDown = true;
-};
-document.ontouchend = function (event) {
-  mouseDown = false;
-};
-
-
 function buildScenes () {
   const geometry = new THREE.PlaneBufferGeometry (window.innerWidth, window.innerHeight);
 
