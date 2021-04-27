@@ -7,10 +7,7 @@ var clickNow = false;
 document.addEventListener( 'pointermove', onPointerMove );
 document.addEventListener( 'mousedown', clickStart );
 document.addEventListener( 'mouseup', clickEnd );
-/*
-document.addEventListener( 'touchstart', touching );
-document.addEventListener( 'touchend', touchFinish );
-*/
+
 function onPointerMove (event) {
      pointer.x = ( event.clientX / window.innerWidth ) * 2 - 1;
      pointer.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
@@ -21,11 +18,9 @@ function onPointerMove (event) {
      }
  }
  function clickStart(event){
-      console.log("click");
       clickNow = true;
  }
 function clickEnd(event){
-      console.log("clickend");
       clickNow = false;
  }
  //general vars
@@ -36,22 +31,22 @@ function clickEnd(event){
  //I'm not sure what all of these are, but it doesn't load if we don't have all of em, and the back ones are helpful for doing some of the computations.
 
 let fluidShape;
-let fluidBackShape;
+let fluidStableShape;
 
 let fluidScene;
-let fluidBackScene;
+let fluidStableScene;
 
 let fluidTexture;
-let fluidBackTexture;
+let fluidStableTexture;
 
 let velShape;
-let velBackShape;
+let velStableShape;
 
 let velBuffer;
-let velBackBuffer;
+let velStableBuffer;
 
 let velTexture;
-let velBackTexture;
+let velStableTexture;
 
 let mainVizShape;
 let mainVizBuffer;
@@ -78,7 +73,7 @@ function launchAttributes(){
         type: THREE.FloatType,
         internalFormat: 'RGBA32F',
   });
-  fluidBackTexture = new THREE.WebGLRenderTarget (window.innerWidth, window.innerHeight,
+  fluidStableTexture = new THREE.WebGLRenderTarget (window.innerWidth, window.innerHeight,
     {
         minFilter: THREE.LinearFilter,
         magFilter: THREE.NearestFilter,
@@ -91,18 +86,18 @@ function launchAttributes(){
   fluidScene.add (fluidShape);
 
   // set up fluid backup Scene
-  fluidBackShape = new THREE.Mesh (geometry);
-  fluidBackScene = new THREE.Scene ();
-  fluidBackScene.add (fluidBackShape);
+  fluidStableShape = new THREE.Mesh (geometry);
+  fluidStableScene = new THREE.Scene ();
+  fluidStableScene.add (fluidStableShape);
   // set up vel scene
   velShape = new THREE.Mesh (geometry);
   velScene = new THREE.Scene ();
   velScene.add (velShape);
 
   // set up spare vel other scene
-  velBackShape = new THREE.Mesh (geometry);
-  velBackScene = new THREE.Scene ();
-  velBackScene.add (velBackShape);
+  velStableShape = new THREE.Mesh (geometry);
+  velStableScene = new THREE.Scene ();
+  velStableScene.add (velStableShape);
 
 
    velTexture = new THREE.WebGLRenderTarget (window.innerWidth, window.innerHeight, {
@@ -111,7 +106,7 @@ function launchAttributes(){
     type: THREE.FloatType,
     internalFormat: 'RGBA32F',
   });
-  velBackTexture = new THREE.WebGLRenderTarget (
+  velStableTexture = new THREE.WebGLRenderTarget (
     window.innerWidth,
     window.innerHeight,
     {
@@ -136,7 +131,13 @@ function launchAttributes(){
         value: new THREE.Vector2 (1.0 / window.innerWidth, 1.0 / window.innerHeight),
       },
     },
-    fragmentShader: "uniform vec4 clickColorMod; void main() {gl_FragColor = clickColorMod; }",
+    fragmentShader: "uniform vec4 clickColorMod; uniform vec2 clickPos; uniform vec2 inverseCanvasSize; uniform sampler2D bufferTexture; uniform float clickRadius;\
+    void main() {\
+    vec2 coord = gl_FragCoord.xy * inverseCanvasSize;\
+          gl_FragColor = texture2D(bufferTexture, coord) * 0.999;\
+          vec2 dist = coord - clickPos;\
+          dist.x *= inverseCanvasSize.y / inverseCanvasSize.x;\
+          gl_FragColor += clickColorMod *smoothstep(inverseCanvasSize.x * clickRadius, 0.0, length(dist));}",
     opacity: 1.0,
     blending: THREE.NoBlending,
   });
@@ -168,16 +169,16 @@ function launchAttributes(){
  }
 
 function addFluid(x, y) {
-  renderer.setRenderTarget (fluidBackTexture);
-  renderer.render (fluidBackScene, camera);
+  renderer.setRenderTarget (fluidStableTexture);
+  renderer.render (fluidStableScene, camera);
   renderer.setRenderTarget (null);
 
   var t = fluidTexture;
-  fluidTexture = fluidBackTexture;
-  fluidBackTexture = t;
+  fluidTexture = fluidStableTexture;
+  fluidStableTexture = t;
  
 
-  clickShader.uniforms.bufferTexture.value = fluidTexture;
+  clickShader.uniforms.bufferTexture.value = fluidTexture.texture;
   clickShader.uniforms.clickPos.value = new THREE.Vector2 (pointer.x, pointer.y);
   clickShader.uniforms.clickColorMod.value = new THREE.Vector4 (
     1.0,
@@ -185,10 +186,10 @@ function addFluid(x, y) {
     .3,
     0.0
   );
-    fluidBackShape.material = clickShader;
+    fluidStableShape.material = clickShader;
 
-  fluidShape.material.map = fluidTexture;
-  fluidBackShape.material.map = fluidBackTexture;
+  fluidShape.material.map = fluidTexture.texture;
+  fluidStableShape.material.map = fluidStableTexture.texture;
 
     clickShader.uniforms.bufferTexture.value = null;
 }
@@ -197,7 +198,7 @@ function addFluid(x, y) {
 function addMotion(curr_pos, last_pos) {
   motion_x = last_pos.x-curr_pos.x;
   motion_y = last_pos.y-curr_pos.y;
-  renderer.setRenderTarget (velBackTexture);
+  renderer.setRenderTarget (velStableTexture);
   clickShader.uniforms.bufferTexture.value = velTexture;
   clickShader.uniforms.clickPos.value = new THREE.Vector2 (curr_pos.x, curr_pos.y);
   clickShader.uniforms.clickColorMod.value = new THREE.Vector4 (
@@ -206,15 +207,15 @@ function addMotion(curr_pos, last_pos) {
     1.0,
     0.0
   );
-  velBackShape.material = clickShader;
-  renderer.render (velBackScene, camera);
+  velStableShape.material = clickShader;
+  renderer.render (velStableScene, camera);
   renderer.setRenderTarget (null);
 
   var t = velTexture;
-  velTexture = velBackTexture;
-  velBackTexture = t;
-  velShape.material.map = velBackTexture;
-  velBackShape.material.map = velTexture;
+  velTexture = velStableTexture;
+  velStableTexture = t;
+  velShape.material.map = velStableTexture;
+  velStableShape.material.map = velTexture;
 
   clickShader.uniforms.bufferTexture.value = null;
 }
@@ -234,16 +235,16 @@ function animate(){
   //this code pattern is from here https://dev.to/maniflames/creating-a-custom-shader-in-threejs-3bhi
   //I don't fully understand it but it doesn't work without the two textures?
   var tempfluid = fluidTexture;
-  fluidTexture = fluidBackTexture;
-  fluidBackTexture = tempfluid;
-  fluidShape.material.map = fluidBackTexture;
-  fluidBackShape.material.map = fluidTexture;
+  fluidTexture = fluidStableTexture;
+  fluidStableTexture = tempfluid;
+  fluidShape.material.map = fluidStableTexture;
+  fluidStableShape.material.map = fluidTexture;
 
    var tempVel = velTexture;
-  velTexture = velBackTexture;
-  velBackTexture = tempVel;
-  velShape.material.map = velBackTexture;
-  velBackShape.material.map = velTexture;
+  velTexture = velStableTexture;
+  velStableTexture = tempVel;
+  velShape.material.map = velStableTexture;
+  velStableShape.material.map = velTexture;
 
   mainViz();
   //E TODO: mainViz function
