@@ -26,3 +26,48 @@
 
     animate();
     </script>-->
+
+
+    fragmentShader: "precision highp float;\
+        uniform sampler2D bufferTexture;\
+        uniform vec2  clickPos;\
+        uniform vec4  clickColorMod;\
+        uniform float clickRadius;\
+        uniform vec2 inverseCanvasSize;\
+        void main(){\
+        vec2 pos = gl_FragCoord.xy * inverseCanvasSize;\
+        gl_FragColor = texture2D(bufferTexture, pos) * 0.999;\
+        vec2 dist = pos - clickPos;\
+        dist.x *= inverseCanvasSize.y / inverseCanvasSize.x;\
+        gl_FragColor += clickColorMod * smoothstep(inverseCanvasSize.x * clickRadius, 0.0, length(dist));\
+        }",
+
+
+  function click_frag_shader(){
+    return"      precision highp float;\
+      uniform sampler2D bufferTexture;\
+      uniform vec2  splatPos;\
+      uniform vec4  splatVal;\
+      uniform float splatRadius;\
+      uniform vec2 inverseCanvasSize;\
+      \
+      void main()\
+      {\
+          vec2 coord = gl_FragCoord.xy * inverseCanvasSize;\
+          gl_FragColor = texture2D(bufferTexture, coord) * 0.999;\
+          vec2 dist = coord - splatPos;\
+          dist.x *= inverseCanvasSize.y / inverseCanvasSize.x;\
+          gl_FragColor += splatVal * smoothstep(inverseCanvasSize.x * splatRadius, 0.0, length(dist));\
+      } ";
+}
+
+
+function vertShadeCode(){
+    return "varying vec2 TexCoord;\
+      void main(void)\
+      {\
+        vec4 modelViewPosition = modelViewMatrix * vec4(position, 1.0);\
+        gl_Position = projectionMatrix * modelViewPosition;\
+        TexCoord = uv;\
+      }"
+}
