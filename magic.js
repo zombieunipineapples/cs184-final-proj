@@ -14,14 +14,14 @@ let fluidTexture;
 let fluidStableTexture;
 
 // VELOCITY
-let velocityShape;
-let velocityStableShape;
+let velShape;
+let velStableShape;
 
-let velocityScene;
-let velocityStableScene;
+let velScene;
+let velStableScene;
 
-let velocityTexture;
-let velocityStableTexture;
+let velTexture;
+let velStableTexture;
 
 // draw
 let drawShape;
@@ -33,7 +33,9 @@ let clickShader;
 let mainShader;
 
 pointer = new THREE.Vector2();
+pointer_start = new THREE.Vector2();
 prev_pointer = new THREE.Vector2();
+direction = new THREE.Vector2();
 var clickNow = false;
 
 document.addEventListener( 'pointermove', onPointerMove );
@@ -52,7 +54,6 @@ function addFluid (posX, posY) {
     .7,
     0.8
   );
-  clickShader.uniforms.isVelocity.value = false;
   fluidStableShape.material = clickShader;
   renderer.render (fluidStableScene, camera);
   renderer.setRenderTarget (null);
@@ -66,20 +67,51 @@ function addFluid (posX, posY) {
   clickShader.uniforms.SceneTexture.value = null;
 }
 
+function pushFluid(pointer, prev_pointer){
+console.log("x", pointer.x, prev_pointer.x)
+    direction.x = pointer.x-prev_pointer.x;
+    direction.y = pointer.y-prev_pointer.y;
+    //make the sahder
+  clickShader.uniforms.SceneTexture.value = velTexture;
+  clickShader.uniforms.clickPos.value = new THREE.Vector2 (pointer[0], pointer[1]);
+  console.log("dir", direction.x, direction.y)
+  clickShader.uniforms.clickVal.value = new THREE.Vector4 (
+    //direction.x * 999999999999999999,
+   // direction.y * 99999999999999999,
+    0.7,
+    0.6
+  );
+  velStableShape.material = clickShader;
+  renderer.render (velStableScene, camera);
+  renderer.setRenderTarget (null);
+
+  var t = velTexture;
+  velTexture = velStableTexture;
+  velStableTexture = t;
+  velShape.material.map = velStableTexture;
+  velStableShape.material.map = velTexture;
+
+  clickShader.uniforms.SceneTexture.value = null;
+}
+
+
 
 function onPointerMove (event) {
      pointer.x = ( event.clientX / window.innerWidth );
      pointer.y = ( event.clientY / window.innerHeight );
      if (clickNow == true){
-     console.log("POINTER", pointer.x, pointer.y);
-           addFluid(pointer.x, pointer.y);
+           //addFluid(pointer.x, pointer.y);
+           //pushFluid(pointer, prev_pointer);
            prev_pointer = pointer;
      }
  }
  function clickStart(event){
+    pointer_start.x = (event.clientX/window.innerWidth);
+    pointer_start.y = (event.clientY/window.innerHeight);
       clickNow = true;
  }
 function clickEnd(event){
+    pushFluid(pointer_start, pointer);
       clickNow = false;
  }
 
@@ -94,6 +126,14 @@ function buildScenes () {
   fluidStableScene = new THREE.Scene ();
   fluidStableScene.add (fluidStableShape);
 
+
+  velShape = new THREE.Mesh (geometry);
+  velScene = new THREE.Scene ();
+  velScene.add (velShape);
+
+  velStableShape = new THREE.Mesh (geometry);
+  velStableScene = new THREE.Scene ();
+  velStableScene.add (velStableShape);
 
   drawShape = new THREE.Mesh (geometry);
   drawScene = new THREE.Scene ();
@@ -118,13 +158,13 @@ function buildTex () {
       internalFormat: 'RGBA32F',
     }
   );
-  velocityTexture = new THREE.WebGLRenderTarget (window.innerWidth, window.innerHeight, {
+  velTexture = new THREE.WebGLRenderTarget (window.innerWidth, window.innerHeight, {
     minFilter: THREE.LinearFilter,
     magFilter: THREE.NearestFilter,
     type: THREE.FloatType,
     internalFormat: 'RGBA32F',
   });
-  velocityStableTexture = new THREE.WebGLRenderTarget (
+  velStableTexture = new THREE.WebGLRenderTarget (
     window.innerWidth,
     window.innerHeight,
     {
@@ -139,7 +179,7 @@ function buildTex () {
 //The shader jazzzzzz
   //Code for here is largely from https://threejs.org/docs/index.html#api/en/materials/ShaderMaterial
 function click_frag_shader(){
-    return"      precision highp float;\
+    return"precision highp float;\
       uniform sampler2D SceneTexture;\
       uniform vec2  clickPos;\
       uniform vec4  clickVal;\
@@ -176,7 +216,6 @@ function buildShaders () {
         type: 'v2',
         value: new THREE.Vector2 (1.0 / window.innerWidth, 1.0 / window.innerHeight),
       },
-      isVelocity: {value: false},
     },
     fragmentShader: click_frag_shader(),
     opacity: 1.0,
@@ -244,6 +283,12 @@ function animate () {
   fluidStableTexture = tempfluid;
   fluidShape.material.map = fluidStableTexture;
   fluidStableShape.material.map = fluidTexture;
+
+    var tempVel = velTexture;
+  velTexture = velStableTexture;
+  velStableTexture = tempVel;
+  velShape.material.map = velStableTexture;
+  velStableShape.material.map = velTexture;
 
   renderer.clear ();
 
