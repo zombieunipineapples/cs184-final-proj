@@ -66,6 +66,32 @@ function addFluid (posX, posY) {
   clickShader.uniforms.SceneTexture.value = null;
 }
 
+function pushFluid(pointer, prev_pointer){
+    direction = pointer-prev_pointer
+     renderer.setRenderTarget (velStableTexture);
+    //make the sahder
+  clickShader.uniforms.bufferTexture.value = velTexture;
+  clickShader.uniforms.clickPos.value = new THREE.Vector2 (posX, posY);
+  clickShader.uniforms.clickVal.value = new THREE.Vector4 (
+    dirX,
+    dirY,
+    0.0,
+    0.0
+  );
+  velocityStableShape.material = splatShader;
+  renderer.render (velocityStableBuffer, camera);
+  renderer.setRenderTarget (null);
+
+  var t = velocityTexture;
+  velocityTexture = velocityStableTexture;
+  velocityStableTexture = t;
+  velocityShape.material.map = velocityStableTexture;
+  velocityStableShape.material.map = velocityTexture;
+
+  clickShader.uniforms.SceneTexture.value = null;
+}
+
+}
 
 function onPointerMove (event) {
      pointer.x = ( event.clientX / window.innerWidth );
@@ -139,7 +165,7 @@ function buildTex () {
 //The shader jazzzzzz
   //Code for here is largely from https://threejs.org/docs/index.html#api/en/materials/ShaderMaterial
 function click_frag_shader(){
-    return"      precision highp float;\
+    return"precision highp float;\
       uniform sampler2D SceneTexture;\
       uniform vec2  clickPos;\
       uniform vec4  clickVal;\
