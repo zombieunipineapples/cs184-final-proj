@@ -33,7 +33,9 @@ let clickShader;
 let mainShader;
 
 pointer = new THREE.Vector2();
+pointer_start = new THREE.Vector2();
 prev_pointer = new THREE.Vector2();
+direction = new THREE.Vector2();
 var clickNow = false;
 
 document.addEventListener( 'pointermove', onPointerMove );
@@ -66,18 +68,20 @@ function addFluid (posX, posY) {
 }
 
 function pushFluid(pointer, prev_pointer){
-    direction = pointer-prev_pointer
-     renderer.setRenderTarget (velStableTexture);
+console.log("x", pointer.x, prev_pointer.x)
+    direction.x = pointer.x-prev_pointer.x;
+    direction.y = pointer.y-prev_pointer.y;
     //make the sahder
-  clickShader.uniforms.bufferTexture.value = velTexture;
+  clickShader.uniforms.SceneTexture.value = velTexture;
   clickShader.uniforms.clickPos.value = new THREE.Vector2 (pointer[0], pointer[1]);
+  console.log("dir", direction.x, direction.y)
   clickShader.uniforms.clickVal.value = new THREE.Vector4 (
-    direction[0] * 999999999999999999,
-    direction[1],
-    0.0,
-    0.0
+    //direction.x * 999999999999999999,
+   // direction.y * 99999999999999999,
+    0.7,
+    0.6
   );
-  velStableShape.material = splatShader;
+  velStableShape.material = clickShader;
   renderer.render (velStableScene, camera);
   renderer.setRenderTarget (null);
 
@@ -96,16 +100,18 @@ function onPointerMove (event) {
      pointer.x = ( event.clientX / window.innerWidth );
      pointer.y = ( event.clientY / window.innerHeight );
      if (clickNow == true){
-     console.log("POINTER", pointer.x, pointer.y);
-           addFluid(pointer.x, pointer.y);
-           pushFluid(pointer, prev_pointer);
+           //addFluid(pointer.x, pointer.y);
+           //pushFluid(pointer, prev_pointer);
            prev_pointer = pointer;
      }
  }
  function clickStart(event){
+    pointer_start.x = (event.clientX/window.innerWidth);
+    pointer_start.y = (event.clientY/window.innerHeight);
       clickNow = true;
  }
 function clickEnd(event){
+    pushFluid(pointer_start, pointer);
       clickNow = false;
  }
 
@@ -277,6 +283,12 @@ function animate () {
   fluidStableTexture = tempfluid;
   fluidShape.material.map = fluidStableTexture;
   fluidStableShape.material.map = fluidTexture;
+
+    var tempVel = velTexture;
+  velTexture = velStableTexture;
+  velStableTexture = tempVel;
+  velShape.material.map = velStableTexture;
+  velStableShape.material.map = velTexture;
 
   renderer.clear ();
 
