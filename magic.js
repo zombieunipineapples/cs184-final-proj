@@ -14,14 +14,14 @@ let fluidTexture;
 let fluidStableTexture;
 
 // VELOCITY
-let velocityShape;
-let velocityStableShape;
+let velShape;
+let velStableShape;
 
-let velocityScene;
-let velocityStableScene;
+let velScene;
+let velStableScene;
 
-let velocityTexture;
-let velocityStableTexture;
+let velTexture;
+let velStableTexture;
 
 // draw
 let drawShape;
@@ -52,7 +52,6 @@ function addFluid (posX, posY) {
     .7,
     0.8
   );
-  clickShader.uniforms.isVelocity.value = false;
   fluidStableShape.material = clickShader;
   renderer.render (fluidStableScene, camera);
   renderer.setRenderTarget (null);
@@ -71,27 +70,27 @@ function pushFluid(pointer, prev_pointer){
      renderer.setRenderTarget (velStableTexture);
     //make the sahder
   clickShader.uniforms.bufferTexture.value = velTexture;
-  clickShader.uniforms.clickPos.value = new THREE.Vector2 (posX, posY);
+  clickShader.uniforms.clickPos.value = new THREE.Vector2 (pointer[0], pointer[1]);
   clickShader.uniforms.clickVal.value = new THREE.Vector4 (
-    dirX,
-    dirY,
+    direction[0] * 999999999999999999,
+    direction[1],
     0.0,
     0.0
   );
-  velocityStableShape.material = splatShader;
-  renderer.render (velocityStableBuffer, camera);
+  velStableShape.material = splatShader;
+  renderer.render (velStableScene, camera);
   renderer.setRenderTarget (null);
 
-  var t = velocityTexture;
-  velocityTexture = velocityStableTexture;
-  velocityStableTexture = t;
-  velocityShape.material.map = velocityStableTexture;
-  velocityStableShape.material.map = velocityTexture;
+  var t = velTexture;
+  velTexture = velStableTexture;
+  velStableTexture = t;
+  velShape.material.map = velStableTexture;
+  velStableShape.material.map = velTexture;
 
   clickShader.uniforms.SceneTexture.value = null;
 }
 
-}
+
 
 function onPointerMove (event) {
      pointer.x = ( event.clientX / window.innerWidth );
@@ -99,6 +98,7 @@ function onPointerMove (event) {
      if (clickNow == true){
      console.log("POINTER", pointer.x, pointer.y);
            addFluid(pointer.x, pointer.y);
+           pushFluid(pointer, prev_pointer);
            prev_pointer = pointer;
      }
  }
@@ -120,6 +120,14 @@ function buildScenes () {
   fluidStableScene = new THREE.Scene ();
   fluidStableScene.add (fluidStableShape);
 
+
+  velShape = new THREE.Mesh (geometry);
+  velScene = new THREE.Scene ();
+  velScene.add (velShape);
+
+  velStableShape = new THREE.Mesh (geometry);
+  velStableScene = new THREE.Scene ();
+  velStableScene.add (velStableShape);
 
   drawShape = new THREE.Mesh (geometry);
   drawScene = new THREE.Scene ();
@@ -144,13 +152,13 @@ function buildTex () {
       internalFormat: 'RGBA32F',
     }
   );
-  velocityTexture = new THREE.WebGLRenderTarget (window.innerWidth, window.innerHeight, {
+  velTexture = new THREE.WebGLRenderTarget (window.innerWidth, window.innerHeight, {
     minFilter: THREE.LinearFilter,
     magFilter: THREE.NearestFilter,
     type: THREE.FloatType,
     internalFormat: 'RGBA32F',
   });
-  velocityStableTexture = new THREE.WebGLRenderTarget (
+  velStableTexture = new THREE.WebGLRenderTarget (
     window.innerWidth,
     window.innerHeight,
     {
@@ -202,7 +210,6 @@ function buildShaders () {
         type: 'v2',
         value: new THREE.Vector2 (1.0 / window.innerWidth, 1.0 / window.innerHeight),
       },
-      isVelocity: {value: false},
     },
     fragmentShader: click_frag_shader(),
     opacity: 1.0,
