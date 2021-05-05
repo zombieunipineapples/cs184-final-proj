@@ -29,7 +29,7 @@ let drawScene;
 
 // SHADERS
 let clickShader;
-
+let advShader;
 let mainShader;
 
 pointer = new THREE.Vector2();
@@ -176,8 +176,27 @@ function buildTex () {
   );
 
 }
+
+function advFluid (timestep) {
+  renderer.setRenderTarget (densityBackTexture);
+  advShader.uniforms.isVelocity.value = false;
+  advShader.uniforms.toAdvectTexture.value = densityTexture;
+  advShader.uniforms.velocityTexture.value = velocityTexture;
+  advShader.uniforms.dt.value = timestep;
+  fluidStableShape.material = advShader;
+  renderer.render (fluidStableScene, camera);
+  renderer.setRenderTarget (null);
+
+  advShader.uniforms.toAdvectTexture.value = null;
+  advShader.uniforms.velocityTexture.value = null;
+  advShader.uniforms.dt.value = 0.0;
+}
+
 //The shader jazzzzzz
-  //Code for here is largely from https://threejs.org/docs/index.html#api/en/materials/ShaderMaterial
+  //Code for here is similar to/draws from:
+  // https://threejs.org/docs/index.html#api/en/materials/ShaderMaterial
+  // https://forum.unity.com/threads/2d-fluid-shader.187671/
+  // https://github.com/dushyantbehl/2D-fluid-simulation/blob/master/pShader.cg
 function click_frag_shader(){
     return"precision highp float;\
       uniform sampler2D SceneTexture;\
@@ -242,6 +261,23 @@ function buildShaders () {
     opacity: 1.0,
     blending: THREE.NormalBlending,
   });
+
+    advShader = new THREE.ShaderMaterial ({
+    uniforms: {
+      SceneTexture: {type: 't', value: fluidTexture},
+      clickPos: {type: 'v2', value: null},
+      clickVal: {type: 'v4', value: null},
+      clickRadius: {value: 50},
+      inverseCanvasSize: {
+        type: 'v2',
+        value: new THREE.Vector2 (1.0 / window.innerWidth, 1.0 / window.innerHeight),
+      },
+    },
+    fragmentShader: click_frag_shader(),
+    opacity: 1.0,
+    blending: THREE.NoBlending,
+  });
+
 }
 
 function start () {
@@ -275,7 +311,6 @@ function start () {
 
 function animate () {
   requestAnimationFrame (animate);
-
     //this code pattern is from here https://dev.to/maniflames/creating-a-custom-shader-in-threejs-3bhi
     //lets us mutate the fluidtex and have a stable copy
   var tempfluid = fluidTexture;
