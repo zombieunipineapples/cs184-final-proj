@@ -68,7 +68,6 @@ function addFluid (posX, posY) {
 }
 
 function pushFluid(pointer, prev_pointer){
-console.log("x", pointer.x, prev_pointer.x)
     direction.x = pointer.x-prev_pointer.x;
     direction.y = pointer.y-prev_pointer.y;
     //make the sahder
@@ -98,10 +97,10 @@ console.log("x", pointer.x, prev_pointer.x)
 
 function onPointerMove (event) {
      pointer.x = ( event.clientX / window.innerWidth );
-     pointer.y = ( event.clientY / window.innerHeight );
+     pointer.y = 1-( event.clientY / window.innerHeight );
      if (clickNow == true){
-           //addFluid(pointer.x, pointer.y);
-           //pushFluid(pointer, prev_pointer);
+           addFluid(pointer.x, pointer.y);
+           pushFluid(pointer, prev_pointer);
            prev_pointer = pointer;
      }
  }
