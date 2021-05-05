@@ -223,6 +223,25 @@ function vertShadeCode(){
         TexCoord = uv;\
       }"
 }
+
+function advectShadeCode(){
+    return "precision highp float;\
+  uniform sampler2D SceneTexture;\
+  varying vec2 tc;\
+  const float h = inverseCanvasSize.y;\
+void main(void) {\
+   vec2 t = texture2D(SceneTexture, tc).xy;\
+   vec2 D = -3.*t,   Df = floor(D),   Dd = D - Df;\
+   vec2 tc1 = tc + Df*h;\
+   float new =    // bilinear interpolation of the 4 closest texels\
+     (texture2D(SceneTexture, tc1).z*(1. - Dd.y) +\
+      texture2D(SceneTexture, vec2(tc1.x, tc1.y + h)).z*Dd.y)*(1. - Dd.x) +\
+     (texture2D(SceneTexture, vec2(tc1.x + h, tc1.y)).z*(1. - Dd.y) +\
+      texture2D(SceneTexture, vec2(tc1.x + h, tc1.y + h)).z*Dd.y)*Dd.x;\
+   gl_FragColor = vec4(t, new, 1. );\
+}" 
+
+}
 function buildShaders () {
   clickShader = new THREE.ShaderMaterial ({
     uniforms: {
