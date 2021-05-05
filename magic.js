@@ -27,6 +27,9 @@ let velStableTexture;
 let drawShape;
 let drawScene;
 
+//time for some thyme
+let t = 0;
+
 // SHADERS
 let clickShader;
 let advShader;
@@ -42,6 +45,21 @@ document.addEventListener( 'pointermove', onPointerMove );
 document.addEventListener( 'onmousemove', onPointerMove );
 document.addEventListener( 'mousedown', clickStart );
 document.addEventListener( 'mouseup', clickEnd );
+
+
+function advFluid (time) {
+  renderer.setRenderTarget (fluidStableTexture);
+  advShader.uniforms.SceneTexture.value = fluidTexture;
+  advShader.uniforms.advTexture.value = velTexture;
+  advShader.uniforms.dt.value = time;
+  fluidStableShape.material = advShader;
+  renderer.render (fluidStableScene, camera);
+  renderer.setRenderTarget (null);
+  //reset shader
+  advShader.uniforms.SceneTexture.value = null;
+  advShader.uniforms.advTexture.value = null;
+  advShader.uniforms.dt.value = 0.0;
+}
 
 
 function addFluid (posX, posY) {
@@ -176,20 +194,7 @@ function buildTex () {
 
 }
 
-function advFluid (timestep) {
-  renderer.setRenderTarget (densityBackTexture);
-  advShader.uniforms.isVelocity.value = false;
-  advShader.uniforms.toAdvectTexture.value = densityTexture;
-  advShader.uniforms.velocityTexture.value = velocityTexture;
-  advShader.uniforms.dt.value = timestep;
-  fluidStableShape.material = advShader;
-  renderer.render (fluidStableScene, camera);
-  renderer.setRenderTarget (null);
 
-  advShader.uniforms.toAdvectTexture.value = null;
-  advShader.uniforms.velocityTexture.value = null;
-  advShader.uniforms.dt.value = 0.0;
-}
 
 //The shader jazzzzzz
   //Code for here is similar to/draws from:
@@ -226,20 +231,33 @@ function vertShadeCode(){
 
 function advectShadeCode(){
     return "precision highp float;\
-  uniform sampler2D SceneTexture;\
-  varying vec2 tc;\
-  const float h = inverseCanvasSize.y;\
-void main(void) {\
-   vec2 t = texture2D(SceneTexture, tc).xy;\
-   vec2 D = -3.*t,   Df = floor(D),   Dd = D - Df;\
-   vec2 tc1 = tc + Df*h;\
-   float new =    // bilinear interpolation of the 4 closest texels\
-     (texture2D(SceneTexture, tc1).z*(1. - Dd.y) +\
-      texture2D(SceneTexture, vec2(tc1.x, tc1.y + h)).z*Dd.y)*(1. - Dd.x) +\
-     (texture2D(SceneTexture, vec2(tc1.x + h, tc1.y)).z*(1. - Dd.y) +\
-      texture2D(SceneTexture, vec2(tc1.x + h, tc1.y + h)).z*Dd.y)*Dd.x;\
-   gl_FragColor = vec4(t, new, 1. );\
-}" 
+      uniform sampler2D SceneTexture;\
+      uniform sampler2D advTexture;\
+      uniform float dt;\
+      uniform vec2 inverseCanvasSize;\
+      uniform bool isVelocity;\
+      \
+      vec4 f4texRECTbilerp(sampler2D tex, vec2 s)//todo: wtf is this doing??; why does the intenet love it?\
+      {\
+        vec4 st;\
+        st.xy = floor(s - 0.5) + 0.5;\
+        st.zw = st.xy + 1.0;\
+        \
+        vec2 t = s - st.xy;\
+        //interpolation over neighbors \
+        vec4 tex11 = texture2D(tex, st.xy * inverseCanvasSize);\
+        vec4 tex21 = texture2D(tex, st.zy * inverseCanvasSize);\
+        vec4 tex12 = texture2D(tex, st.xw * inverseCanvasSize);\
+        vec4 tex22 = texture2D(tex, st.zw * inverseCanvasSize);\
+        \
+        return mix(mix(tex11, tex21, t.x), mix(tex12, tex22, t.x), t.y);\
+      }\
+      \
+      void main()\
+      {\
+          vec2 pos = gl_FragCoord.xy - dt  * texture2D(advTexture, gl_FragCoord.xy * inverseCanvasSize).xy;\
+          gl_FragColor = f4texRECTbilerp(SceneTexture, pos);\
+      }" 
 
 }
 function buildShaders () {
@@ -282,7 +300,9 @@ function buildShaders () {
 
     advShader = new THREE.ShaderMaterial ({
     uniforms: {
-      SceneTexture: {type: 't', value: fluidTexture},
+      dt: {value:0.0},
+      SceneTexture: {type: 't', value: null},
+      advTexture: {type: 't', value: null},
       clickPos: {type: 'v2', value: null},
       clickVal: {type: 'v4', value: null},
       clickRadius: {value: 50},
@@ -329,6 +349,7 @@ function start () {
 
 function animate () {
   requestAnimationFrame (animate);
+
     //this code pattern is from here https://dev.to/maniflames/creating-a-custom-shader-in-threejs-3bhi
     //lets us mutate the fluidtex and have a stable copy
   var tempfluid = fluidTexture;
@@ -337,6 +358,8 @@ function animate () {
   fluidShape.material.map = fluidStableTexture;
   fluidStableShape.material.map = fluidTexture;
 
+    advFluid(t);
+
     var tempVel = velTexture;
   velTexture = velStableTexture;
   velStableTexture = tempVel;
@@ -344,7 +367,7 @@ function animate () {
   velStableShape.material.map = velTexture;
 
   renderer.clear ();
-
+   t+= 0.01;
   draw ();
 }
 
