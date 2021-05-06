@@ -28,7 +28,7 @@ let drawShape;
 let drawScene;
 
 //time for some thyme
-let t = 0;
+let step = 0;
 
 // SHADERS
 let clickShader;
@@ -49,16 +49,17 @@ document.addEventListener( 'mouseup', clickEnd );
 
 function advFluid (time) {
   renderer.setRenderTarget (fluidStableTexture);
+  //bump the time on the shader
   advShader.uniforms.SceneTexture.value = fluidTexture;
   advShader.uniforms.advTexture.value = velTexture;
-  advShader.uniforms.dt.value = time;
+  advShader.uniforms.timeDiff.value = time;
   fluidStableShape.material = advShader;
   renderer.render (fluidStableScene, camera);
   renderer.setRenderTarget (null);
-  //reset shader
+  //reset
   advShader.uniforms.SceneTexture.value = null;
   advShader.uniforms.advTexture.value = null;
-  advShader.uniforms.dt.value = 0.0;
+  advShader.uniforms.timeDiff.value = 0.0;
 }
 
 
@@ -95,6 +96,8 @@ function pushFluid(pointer, prev_pointer){
   clickShader.uniforms.clickVal.value = new THREE.Vector4 (
     //direction.x * 999999999999999999,
    // direction.y * 99999999999999999,
+   .8,
+   .4,
     0.7,
     0.6
   );
@@ -300,7 +303,7 @@ function buildShaders () {
 
     advShader = new THREE.ShaderMaterial ({
     uniforms: {
-      dt: {value:0.0},
+      timeDiff: {value:0.0},
       SceneTexture: {type: 't', value: null},
       advTexture: {type: 't', value: null},
       clickPos: {type: 'v2', value: null},
@@ -358,7 +361,7 @@ function animate () {
   fluidShape.material.map = fluidStableTexture;
   fluidStableShape.material.map = fluidTexture;
 
-    advFluid(t);
+    advFluid(step);
 
     var tempVel = velTexture;
   velTexture = velStableTexture;
@@ -367,7 +370,7 @@ function animate () {
   velStableShape.material.map = velTexture;
 
   renderer.clear ();
-   t+= 0.01;
+   step+= 0.01;
   draw ();
 }
 
